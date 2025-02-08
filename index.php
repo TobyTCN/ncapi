@@ -21,7 +21,7 @@ function is_perfect($n) {
 }
 
 function is_armstrong($n) {
-    $digits = str_split((string)abs($n)); // Handle negative numbers
+    $digits = str_split((string)abs($n)); // Handle negatives
     $length = count($digits);
     $sum = 0;
     foreach ($digits as $digit) {
@@ -31,11 +31,11 @@ function is_armstrong($n) {
 }
 
 function digit_sum($n) {
-    return array_sum(str_split((string)abs($n))); // Handle negative numbers
+    return array_sum(str_split((string)abs($n))); // Handle negatives
 }
 
 function get_fun_fact($n) {
-    $url = "http://numbersapi.com/" . abs($n) . "/math?json"; // Handle negative numbers
+    $url = "http://numbersapi.com/" . abs($n) . "/math?json"; // Handle negatives
     $response = @file_get_contents($url);
     $data = json_decode($response, true);
     return $data['text'] ?? "No fun fact available.";
@@ -43,22 +43,25 @@ function get_fun_fact($n) {
 
 // Main logic
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
-    $input = $_GET['number'];
+    $input = trim($_GET['number']);
 
-    // Ensure all numeric values (including negative and float) are accepted
+    // Validate input: ensure it's numeric (integer or float)
     if (!is_numeric($input)) {
         http_response_code(400);
-        echo json_encode(["number" => $input, "error" => true]);
+        echo json_encode(["error" => "Invalid input. Please provide a valid number."]);
         exit;
     }
 
-    $number = (float)$input; // Accept floats
-    $properties = [];
+    // Convert input to the correct type (integer if whole, float if decimal)
+    $number = strpos($input, '.') === false ? (int)$input : (float)$input;
 
+    // Determine properties
+    $properties = [];
     if (is_armstrong($number)) $properties[] = "armstrong";
     if ($number % 2 == 0) $properties[] = "even";
     else $properties[] = "odd";
 
+    // Create response
     $response = [
         "number" => $number,
         "is_prime" => is_prime($number),
@@ -72,6 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 } else {
     http_response_code(400);
-    echo json_encode(["number" => null, "error" => true]);
+    echo json_encode(["error" => "Missing or invalid number parameter."]);
 }
 ?>
