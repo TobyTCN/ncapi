@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *"); // Handle CORS
+header("Access-Control-Allow-Origin: *"); // Allow all origins for CORS
 
 // Helper functions
 function is_prime($n) {
@@ -45,10 +45,13 @@ function get_fun_fact($n) {
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     $input = trim($_GET['number']);
 
-    // Validate input: ensure it's numeric (integer or float)
+    // Ensure input is numeric (integer or float)
     if (!is_numeric($input)) {
         http_response_code(400);
-        echo json_encode(["error" => "Invalid input. Please provide a valid number."]);
+        echo json_encode([
+            "number" => $input, // Include invalid input
+            "error" => "Invalid input. Please provide a valid number."
+        ]);
         exit;
     }
 
@@ -75,6 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 } else {
     http_response_code(400);
-    echo json_encode(["error" => "Missing or invalid number parameter."]);
+    echo json_encode([
+        "number" => null,
+        "error" => "Missing or invalid number parameter."
+    ]);
 }
 ?>
