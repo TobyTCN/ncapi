@@ -45,7 +45,7 @@ function get_fun_fact($n) {
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     $input = trim($_GET['number']);
 
-    // Ensure input is numeric (integer or float)
+    // Ensure input is a valid number (integer or float)
     if (!is_numeric($input)) {
         http_response_code(400);
         echo json_encode([
@@ -56,7 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     }
 
     // Convert input to the correct type (integer if whole, float if decimal)
-    $number = strpos($input, '.') === false ? (int)$input : (float)$input;
+    if (strpos($input, '.') !== false) {
+        $number = (float)$input;
+    } else {
+        $number = (int)$input;
+    }
+
+    // Ensure valid numbers always return 200
+    http_response_code(200);
 
     // Determine properties
     $properties = [];
@@ -74,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
         "fun_fact" => get_fun_fact($number)
     ];
 
-    http_response_code(200);
     echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 } else {
     http_response_code(400);
