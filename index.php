@@ -21,22 +21,22 @@ function is_perfect($n) {
 }
 
 function is_armstrong($n) {
-    $digits = str_split((string)$n);
+    $digits = str_split((string)abs($n)); // Handle negative numbers
     $length = count($digits);
     $sum = 0;
     foreach ($digits as $digit) {
         $sum += pow((int)$digit, $length);
     }
-    return $sum == $n;
+    return $sum == abs($n);
 }
 
 function digit_sum($n) {
-    return array_sum(str_split((string)$n));
+    return array_sum(str_split((string)abs($n))); // Handle negative numbers
 }
 
 function get_fun_fact($n) {
-    $url = "http://numbersapi.com/$n/math?json";
-    $response = file_get_contents($url);
+    $url = "http://numbersapi.com/" . abs($n) . "/math?json"; // Handle negative numbers
+    $response = @file_get_contents($url);
     $data = json_decode($response, true);
     return $data['text'] ?? "No fun fact available.";
 }
@@ -44,14 +44,17 @@ function get_fun_fact($n) {
 // Main logic
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     $input = $_GET['number'];
+
+    // Ensure all numeric values (including negative and float) are accepted
     if (!is_numeric($input)) {
         http_response_code(400);
         echo json_encode(["number" => $input, "error" => true]);
         exit;
     }
 
-    $number = (int)$input;
+    $number = (float)$input; // Accept floats
     $properties = [];
+
     if (is_armstrong($number)) $properties[] = "armstrong";
     if ($number % 2 == 0) $properties[] = "even";
     else $properties[] = "odd";
@@ -66,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['number'])) {
     ];
 
     http_response_code(200);
-    echo json_encode($response);
+    echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 } else {
     http_response_code(400);
     echo json_encode(["number" => null, "error" => true]);
